@@ -1,7 +1,9 @@
-import { Body, Controller, Delete, Get, Header, HttpCode, Param, Post, Put, Query, Redirect } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Header, HttpCode, HttpException, HttpStatus, ImATeapotException, Param, Post, Put, Query, Redirect, UseFilters } from "@nestjs/common";
 import { CreateCatDto } from "./dto/create-cat.dto";
 import { CatsService } from "./cats.service";
 import { Cat } from "./interfaces/cat.interface";
+import { CatException } from "src/exceptions/cat.exception";
+import { HttpExceptionFilter } from "src/exceptions/http-exception.filter";
 
 /*
     Passar um parâmetro para 
@@ -138,4 +140,76 @@ export class CatsController {
         return `This action delete the #${id} cat`
     }
 
+    /*
+
+        Na função abaixo podemos ver um retorno de HttpException
+        para manusear erros na aplicação
+
+    */
+
+    @Get('errors/forbidden')
+    async forbiddenRequest() {
+        throw new HttpException('Forbidden', HttpStatus.FORBIDDEN)
+    }
+
+    /*
+        
+        Na função abaixo podemos ver como fazer uma mensagem
+        de retorno customizada, informando o status e o error
+        que serão recebidos no body da requisição.
+
+    */
+
+    @Get('errors/customerror')
+    async customErrorRequest() {
+        throw new HttpException({
+            status: HttpStatus.FORBIDDEN,
+            error: 'This is a custom message'
+        }, HttpStatus.FORBIDDEN)
+    }
+
+    /*
+        Na função abaixo podemos ver como fazer uma 
+        exception customizada. 
+        Veja o arquivo cat.exception.ts para ver como
+        é criado uma exception customizada.
+    */
+
+    @Get('errors/catexception')
+    async catExceptionRequest() {
+        // throw new ImATeapotException()
+        throw new CatException()
+    }
+
+    /*
+
+        O metodo abaixo mostra como carregarmos
+        e utilizarmos um filtro de exception
+
+        Veja o arquivo http-exception.filter.ts
+        para entender como é feito
+
+        O decorator @UseFilters permite caregarmos 
+        um filtro na requisição
+
+        Pode ser utilizado mais de 1 parametro no
+        decorator @UseFilters() basta apenas passar
+        como lista e separar por virgulas.
+
+        Os Filtros de exceção podem ser utilizados no 
+        contexto de uma controller passando antes da definição
+        da classe o mesmo decorator utilizado abaixo.
+
+        Pode tambem ser usado globalmente, utilizando a propriedade
+        app.useGlobalFilters(new HttpExceptionFilter()) dentro do 
+        arquivo main.ts
+    */
+
+    @Get('errors/exceptionfilter')
+    @UseFilters(new HttpExceptionFilter())
+    async exceptionFilter() {
+        throw new CatException()
+    }
+
+    
 }
