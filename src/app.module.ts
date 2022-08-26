@@ -1,11 +1,47 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { CatsController } from './cats.controller';
 import { AppService } from './app.service';
+import { CatsModule } from './cats/cats.module';
+import { LoggerMiddleware } from './middlewares/logger.middleware';
+import { functionalLogger } from './middlewares/functional.logger.middleware';
 
 @Module({
-  imports: [],
-  controllers: [AppController, CatsController],
+  imports: [CatsModule],
+  controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+
+  /*
+
+    A configuração de um middleware é feita da forma a seguir
+    utiliza-se do consumer para aplicar o Middleware, passando o 
+    Middleware a ser aplicato e para quais rotas deve ser utilizado
+    
+    Obs: Para utilizar o Middleware, o módulo deve
+    implementar o NestModule
+
+    Podemos limitar um middleware para apenas um metodo request 
+    de uma rota. Assim, o forRoutes() ficaria da seguinte forma
+    se aplicado somente para o metodo Get
+
+    .forRoutes({ path: 'cats', method: RequestMethod.GET })
+
+    Para fazer um middleware funcionar em todas as rotas de uma
+    controller, utilizariamos assim o .forRoutes()
+
+    .forRoutes(CatsController)
+
+    A propriedade .exclude() permite informar uma rota da qual
+    não desejamos ter a interferência do Middleware
+  */
+
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(LoggerMiddleware, functionalLogger)
+      .exclude({
+        path: 'cats', method:RequestMethod.GET
+      })
+      .forRoutes('cats')
+  }
+}

@@ -1,5 +1,7 @@
 import { Body, Controller, Delete, Get, Header, HttpCode, Param, Post, Put, Query, Redirect } from "@nestjs/common";
-import { CreateCatDto } from "./create-cat.dto";
+import { CreateCatDto } from "./dto/create-cat.dto";
+import { CatsService } from "./cats.service";
+import { Cat } from "./interfaces/cat.interface";
 
 /*
     Passar um parâmetro para 
@@ -10,6 +12,16 @@ import { CreateCatDto } from "./create-cat.dto";
 */
 @Controller('cats')
 export class CatsController {
+    /*
+        A utilização do decorator @Injetable() 
+        em cats.service.ts combinado com o 
+        moderador private no constructor 
+        permite que a variável catsService abaixo
+        seja declarara e inicializada, também utilizada
+        dentro do escopo da classe
+    */
+    constructor(private catsService: CatsService) {}
+    
     /* 
         O nest associa que um decorator de método HTTP (Get,Post,..)
         sem parâmetros, terá como rota o parâmetro informado no 
@@ -19,8 +31,8 @@ export class CatsController {
         a rota para acessar o método findAll abaixo seria /cats/type
     */
     @Get()
-    findAll(): string {
-        return 'This action return all cats'
+    async findAll(): Promise<Cat[]> {
+        return this.catsService.findAll()
     }
 
     /*
@@ -38,8 +50,8 @@ export class CatsController {
     @HttpCode(204)
     @Header('Cache-Control', 'none')
     @Header('Qualquer', 'Coisa')
-    async create(@Body() createCatDto: CreateCatDto): Promise<string> {
-        return 'This action adds a new cat'
+    async create(@Body() createCatDto: CreateCatDto) {
+        this.catsService.create(createCatDto)
     }
 
     /* 
