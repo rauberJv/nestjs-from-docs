@@ -1,0 +1,9 @@
+ValidationPipe
+ParseIntPipe
+ParseFloatPipe
+ParseBoolPipe
+ParseArrayPipe
+ParseUUIDPipe
+ParseEnumPipe
+DefaultValuePipe
+ParseFilePipe

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Header, HttpCode, HttpException, HttpStatus, ImATeapotException, Param, Post, Put, Query, Redirect, UseFilters } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Header, HttpCode, HttpException, HttpStatus, ImATeapotException, Param, ParseIntPipe, Post, Put, Query, Redirect, UseFilters } from "@nestjs/common";
 import { CreateCatDto } from "./dto/create-cat.dto";
 import { CatsService } from "./cats.service";
 import { Cat } from "./interfaces/cat.interface";
@@ -97,16 +97,24 @@ export class CatsController {
 
         E possivel fazer uma especie de destruct no params,
         alterando os parametros do metodo findOne() para 
-        @Param('id') id: string
+        @Param('id') id: string ou utilizar com o objeto params
+        ficando da seguinte forma (@Param() params)
 
         Assim sera possivel se comunicar direto com o 
         parametro id sem ter de acessar o objeto params
 
+        O parametro ParseIntPipe faz parte dos pipes do nest,
+        sendo utilizado para fazer uma verificação se o parametro
+        é do tipo requerido, caso contrário não irá executar o corpo
+        do método.
+
+        Veja o arquivo pipe.types.txt para ver mais tipos de pipes
+
     */
 
     @Get(':id')
-    findOne(@Param() params): string {
-        return `This action returns a #${params.id} cat`
+    findOne(@Param('id', ParseIntPipe) id: number): string {
+        return `This action returns a #${id} cat`
     }
 
     /*
