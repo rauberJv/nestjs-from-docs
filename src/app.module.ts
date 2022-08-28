@@ -4,11 +4,25 @@ import { AppService } from './app.service';
 import { CatsModule } from './cats/cats.module';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { functionalLogger } from './middlewares/functional.logger.middleware';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './guards/auth.guard';
+
+  /* 
+    
+    Um guard pode ser executado a nivel de modulo
+    sendo assim, o mesmo será aplicado para todos 
+    as controllers e metodos abaixo do modulo em
+    que o guard foi chamado
+
+  */
 
 @Module({
   imports: [CatsModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, {
+    provide: APP_GUARD,
+    useClass: AuthGuard
+  }],
 })
 export class AppModule implements NestModule {
 

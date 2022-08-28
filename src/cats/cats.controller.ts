@@ -1,9 +1,12 @@
-import { Body, Controller, Delete, Get, Header, HttpCode, HttpException, HttpStatus, ImATeapotException, Param, ParseIntPipe, Post, Put, Query, Redirect, UseFilters } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Header, HttpCode, HttpException, HttpStatus, ImATeapotException, Param, ParseIntPipe, Post, Put, Query, Redirect, SetMetadata, UseFilters, UseGuards } from "@nestjs/common";
 import { CreateCatDto } from "./dto/create-cat.dto";
 import { CatsService } from "./cats.service";
 import { Cat } from "./interfaces/cat.interface";
 import { CatException } from "src/exceptions/cat.exception";
 import { HttpExceptionFilter } from "src/exceptions/http-exception.filter";
+import { RolesGuard } from "src/guards/roles.guard";
+import { AuthGuard } from "src/guards/auth.guard";
+import { Roles } from "src/decorators/roles.decorator";
 
 /*
     Passar um parâmetro para 
@@ -11,8 +14,14 @@ import { HttpExceptionFilter } from "src/exceptions/http-exception.filter";
     um "prefixo" para as rotas,
     assim não terá de repetir 'cats' em todos
     Get, Post, Put,..
+
+    o decorator @UseGuards permite utilizar um guard
+    em nivel de controller, ou método, ou global.
+    Aplicando ele acima da classe, mantém ele no escopo
+    da controller, sendo ativado em todos os métodos chamados
 */
 @Controller('cats')
+@UseGuards(RolesGuard)
 export class CatsController {
     /*
         A utilização do decorator @Injetable() 
@@ -31,8 +40,16 @@ export class CatsController {
 
         Se fosse passado um parâmetro e ficasse por exemplo @Get('type')
         a rota para acessar o método findAll abaixo seria /cats/type
+
+        Como visto acima, o decorator @UseGuards faz o bind de um guard
+        para um metodo, classe ou escopo global. Pode ser passado como 
+        classe, ou como instância igual feito abaixo
+
+
     */
     @Get()
+    // @UseGuards(new AuthGuard())
+    @Roles('admin')
     async findAll(): Promise<Cat[]> {
         return this.catsService.findAll()
     }
@@ -50,7 +67,6 @@ export class CatsController {
 
     @Post()
     @HttpCode(204)
-    @Header('Cache-Control', 'none')
     @Header('Qualquer', 'Coisa')
     async create(@Body() createCatDto: CreateCatDto) {
         this.catsService.create(createCatDto)
