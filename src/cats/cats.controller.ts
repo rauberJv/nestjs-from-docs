@@ -1,12 +1,14 @@
-import { Body, Controller, Delete, Get, Header, HttpCode, HttpException, HttpStatus, ImATeapotException, Param, ParseIntPipe, Post, Put, Query, Redirect, SetMetadata, UseFilters, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Header, HttpCode, HttpException, HttpStatus, ImATeapotException, Param, ParseIntPipe, Post, Put, Query, Redirect, SetMetadata, UseFilters, UseGuards, UseInterceptors } from "@nestjs/common";
 import { CreateCatDto } from "./dto/create-cat.dto";
 import { CatsService } from "./cats.service";
 import { Cat } from "./interfaces/cat.interface";
 import { CatException } from "src/exceptions/cat.exception";
 import { HttpExceptionFilter } from "src/exceptions/http-exception.filter";
 import { RolesGuard } from "src/guards/roles.guard";
-import { AuthGuard } from "src/guards/auth.guard";
 import { Roles } from "src/decorators/roles.decorator";
+import { LoggingInterceptor } from "src/interceptors/logging.interceptor";
+import { TransformInterceptor } from "src/interceptors/transform.interceptor";
+import { User } from "src/decorators/user.decorator";
 
 /*
     Passar um parâmetro para 
@@ -19,9 +21,17 @@ import { Roles } from "src/decorators/roles.decorator";
     em nivel de controller, ou método, ou global.
     Aplicando ele acima da classe, mantém ele no escopo
     da controller, sendo ativado em todos os métodos chamados
+
+    o decorator @UseInterceptors permite utilizar um 
+    interceptor em uma classe, ou método,ou global
+    Assim como guards, pipes, exception filters, podemos
+    passar uma instancia new LogginInterceptor() ao inves
+    de deixar a logica de injeção de dependencia para o 
+    framework.
 */
 @Controller('cats')
 @UseGuards(RolesGuard)
+@UseInterceptors(LoggingInterceptor, TransformInterceptor)
 export class CatsController {
     /*
         A utilização do decorator @Injetable() 
@@ -31,8 +41,8 @@ export class CatsController {
         seja declarara e inicializada, também utilizada
         dentro do escopo da classe
     */
-    constructor(private catsService: CatsService) {}
-    
+    constructor(private catsService: CatsService) { }
+
     /* 
         O nest associa que um decorator de método HTTP (Get,Post,..)
         sem parâmetros, terá como rota o parâmetro informado no 
@@ -97,11 +107,11 @@ export class CatsController {
 
     @Get('redirectcat')
     @Redirect('http://localhost:3000/cats', 301)
-    redirectCat(@Query('querycat') queryCat){
-        if(queryCat && queryCat !== '1') {
-            return { url: `https://google.com/search?q=${queryCat}`}
+    redirectCat(@Query('querycat') queryCat) {
+        if (queryCat && queryCat !== '1') {
+            return { url: `https://google.com/search?q=${queryCat}` }
         }
-    }  
+    }
 
     /* 
         Para passar parametros na rota,
@@ -235,5 +245,11 @@ export class CatsController {
         throw new CatException()
     }
 
-    
+
+    @Get('decorators/userdecorator')
+    async userDecorator(@User('firstName') firstName: string) {
+        return `Hello ${firstName}`
+    }
+
+
 }

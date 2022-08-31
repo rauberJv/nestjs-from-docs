@@ -7,7 +7,7 @@ import { SetMetadata } from '@nestjs/common'
     para fazer uso do rolesguard (roles.guard.ts)
 
     Não é uma boa prática utilizar o decorator @SetMetaData dentro
-    de uma controller, é melhor abstraíla e criar um decorator
+    de uma controller, é melhor abstraí-la e criar um decorator
     customizado como fizemos aqui.
 
 */
