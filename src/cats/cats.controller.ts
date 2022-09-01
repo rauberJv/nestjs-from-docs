@@ -51,14 +51,8 @@ export class CatsController {
         Se fosse passado um parâmetro e ficasse por exemplo @Get('type')
         a rota para acessar o método findAll abaixo seria /cats/type
 
-        Como visto acima, o decorator @UseGuards faz o bind de um guard
-        para um metodo, classe ou escopo global. Pode ser passado como 
-        classe, ou como instância igual feito abaixo
-
-
     */
     @Get()
-    // @UseGuards(new AuthGuard())
     @Roles('admin')
     async findAll(): Promise<Cat[]> {
         return this.catsService.findAll()
@@ -247,8 +241,8 @@ export class CatsController {
 
 
     @Get('decorators/userdecorator')
-    async userDecorator(@User('firstName') firstName: string) {
-        return `Hello ${firstName}`
+    async userDecorator(@User('firstName') firstName: string, @User('lastName') lastName: string) {
+        return `Hello ${firstName} ${lastName}`
     }
 
 
