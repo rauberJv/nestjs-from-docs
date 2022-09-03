@@ -6,18 +6,32 @@ import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { functionalLogger } from './middlewares/functional.logger.middleware';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './guards/auth.guard';
+import { MongooseModule } from '@nestjs/mongoose';
+/* 
+  
+  Um guard pode ser executado a nivel de modulo
+  sendo assim, o mesmo será aplicado para todos 
+  as controllers e metodos abaixo do modulo em
+  que o guard foi chamado
 
-  /* 
-    
-    Um guard pode ser executado a nivel de modulo
-    sendo assim, o mesmo será aplicado para todos 
-    as controllers e metodos abaixo do modulo em
-    que o guard foi chamado
+  Dentro do imports fazemos a importação do modulo
+  do mongoose para que ele possa ser corretamente 
+  injetado e utilizado dentro da aplicação Nest
+  Diferente de cats.module.ts, aqui nos declaramos
+  a inicialização do banco de dados apontando seu
+  caminho driver:host:databasename
 
-  */
+  É possível utilizar multiplas conexões de bancos
+  em algumas aplicações pode ser necessario, então seria 
+  feito da seguinte forma 
+  MongooseModule.forRoot('mongodb://localhost/test',{connectionName:'[nome_conexao]'})
+  No caso de ser utilizado da forma acima, então onde é chamado o .forFeature devera ficar
+  MongooseModule.forFeature([{name: Cat.name, schema: CatSchema}], '[nome_conexao]')
+  
+*/
 
 @Module({
-  imports: [CatsModule],
+  imports: [CatsModule, MongooseModule.forRoot('mongodb://localhost/nest')],
   controllers: [AppController],
   providers: [AppService, {
     provide: APP_GUARD,
@@ -54,7 +68,7 @@ export class AppModule implements NestModule {
     consumer
       .apply(LoggerMiddleware, functionalLogger)
       .exclude({
-        path: 'cats', method:RequestMethod.GET
+        path: 'cats', method: RequestMethod.GET
       })
       .forRoutes('cats')
   }
